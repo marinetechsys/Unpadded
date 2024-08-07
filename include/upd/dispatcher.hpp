@@ -67,6 +67,14 @@ struct actions {
 
 } // namespace detail
 
+//! \brief Enumerates the possible status of a loading packet
+//!
+//! - `LOADING_PACKET`: The packet is currently being loaded and is not yet complete
+//! - `DROPPED_PACKET`: The packet loading has been canceled before completion
+//! - `RESOLVED_PACKET`: The packet loading has been completed and the corresponding action has been called
+//!
+enum class packet_status { LOADING_PACKET, DROPPED_PACKET, RESOLVED_PACKET };
+
 //! \brief Action container able to accept and process action requests
 //!
 //! A dispatcher is constructed from a \ref<keyring> keyring instance and is able to unserialize a payload serialized by

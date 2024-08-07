@@ -37,14 +37,6 @@ using needed_output_buffer_size = detail::max<detail::map_parameters_size<typena
 
 } // namespace detail
 
-//! \brief Enumerates the possible status of a loading packet
-//!
-//! - `LOADING_PACKET`: The packet is currently being loaded and is not yet complete
-//! - `DROPPED_PACKET`: The packet loading has been canceled before completion
-//! - `RESOLVED_PACKET`: The packet loading has been completed and the corresponding action has been called
-//!
-enum class packet_status { LOADING_PACKET, DROPPED_PACKET, RESOLVED_PACKET };
-
 //! \brief Dispatcher with input / output storage
 //!
 //! Instances of this class may store input and output byte streams while they are received or sent. This allows the
