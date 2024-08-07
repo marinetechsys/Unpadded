@@ -64,10 +64,10 @@ enum class packet_status { LOADING_PACKET, DROPPED_PACKET, RESOLVED_PACKET };
 //! \tparam D Derived class
 //! \tparam Dispatcher Type of the underlying dispatcher
 template<typename D, typename Dispatcher>
-class buffered_dispatcher : public detail::immediate_reader<buffered_dispatcher<D, Dispatcher>, packet_status>,
-                            public detail::immediate_writer<buffered_dispatcher<D, Dispatcher>>,
-                            public detail::immediate_process<buffered_dispatcher<D, Dispatcher>, packet_status> {
-  using this_t = buffered_dispatcher<D, Dispatcher>;
+class buffered_undispatcher : public detail::immediate_reader<buffered_undispatcher<D, Dispatcher>, packet_status>,
+                            public detail::immediate_writer<buffered_undispatcher<D, Dispatcher>>,
+                            public detail::immediate_process<buffered_undispatcher<D, Dispatcher>, packet_status> {
+  using this_t = buffered_undispatcher<D, Dispatcher>;
 
   D &derived() { return reinterpret_cast<D &>(*this); }
   const D &derived() const { return reinterpret_cast<const D &>(*this); }
@@ -86,10 +86,10 @@ public:
   //! \tparam Keyring \ref<keyring> keyring template instance
   //! \tparam Action_Features Allowed action features for the managed actions
   template<typename Keyring, action_features Action_Features>
-  explicit buffered_dispatcher(Keyring, action_features_h<Action_Features>) : buffered_dispatcher{} {}
+  explicit buffered_undispatcher(Keyring, action_features_h<Action_Features>) : buffered_undispatcher{} {}
 
-  //! \copydoc buffered_dispatcher::buffered_dispatcher
-  buffered_dispatcher()
+  //! \copydoc buffered_undispatcher::buffered_undispatcher
+  buffered_undispatcher()
       : m_is_index_loaded{false}, m_load_count{sizeof(index_t)}, m_ibuf_next{0}, m_obuf_next{0}, m_obuf_bottom{0} {}
 
   //! \brief Indicates whether the output buffer contains data to send
@@ -134,7 +134,9 @@ public:
       return packet_status::LOADING_PACKET;
 
     if (m_is_index_loaded) {
-      call();
+      m_is_index_loaded = false;
+      m_load_count = sizeof(index_t);
+      m_ibuf_next = 0;
       return packet_status::RESOLVED_PACKET;
     } else {
       auto *ibuf_ptr = derived().ibuf_begin();
@@ -144,7 +146,9 @@ public:
         m_is_index_loaded = true;
 
         if (m_load_count == 0) {
-          call();
+          m_is_index_loaded = false;
+          m_load_count = sizeof(index_t);
+          m_ibuf_next = 0;
           return packet_status::RESOLVED_PACKET;
         } else {
           return packet_status::LOADING_PACKET;
@@ -256,21 +260,6 @@ public:
   const action_t &operator[](index_t index) const { return m_dispatcher[index]; }
 
 private:
-  //! \brief Provided that the input buffer does contain a full action request, invoke the corresponding action
-  //! \warning If the input buffer does not contain a valid action request, the behavior is undefined.
-  void call() {
-    m_obuf_bottom = 0;
-    m_obuf_next = 0;
-
-    auto *ibuf_ptr = derived().ibuf_begin();
-    auto index = get_index([&]() { return *ibuf_ptr++; });
-    m_dispatcher[index]([&]() { return *ibuf_ptr++; },
-                        [&](byte_t byte) { derived().obuf_begin()[m_obuf_bottom++] = byte; });
-
-    m_is_index_loaded = false;
-    m_load_count = sizeof(index_t);
-    m_ibuf_next = 0;
-  }
 
   //! \copydoc dispatcher::get_index
   template<typename Src>
@@ -293,8 +282,8 @@ private:
 //!
 //! \tparam Dispatcher Underlying dispatcher type
 template<typename Dispatcher>
-class single_buffered_dispatcher : public buffered_dispatcher<single_buffered_dispatcher<Dispatcher>, Dispatcher> {
-  using base_t = buffered_dispatcher<single_buffered_dispatcher<Dispatcher>, Dispatcher>;
+class single_buffered_dispatcher : public buffered_undispatcher<single_buffered_dispatcher<Dispatcher>, Dispatcher> {
+  using base_t = buffered_undispatcher<single_buffered_dispatcher<Dispatcher>, Dispatcher>;
 
   friend base_t;
   byte_t *ibuf_begin() { return m_buf; }
@@ -351,8 +340,8 @@ make_single_buffered_dispatcher(Keyring, action_features_h<Action_Features>) {
 //!
 //! \tparam Dispatcher Underlying dispatcher type
 template<typename Dispatcher>
-class double_buffered_dispatcher : public buffered_dispatcher<double_buffered_dispatcher<Dispatcher>, Dispatcher> {
-  using base_t = buffered_dispatcher<double_buffered_dispatcher<Dispatcher>, Dispatcher>;
+class double_buffered_dispatcher : public buffered_undispatcher<double_buffered_dispatcher<Dispatcher>, Dispatcher> {
+  using base_t = buffered_undispatcher<double_buffered_dispatcher<Dispatcher>, Dispatcher>;
 
   friend base_t;
   byte_t *ibuf_begin() { return m_ibuf; }
