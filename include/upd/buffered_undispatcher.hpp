@@ -278,12 +278,12 @@ private:
 //! and any action response.
 //!
 //!\warning It is not possible to read a request and write a response at the same time. If you
-//! need to do that, use \ref<double_buffered_dispatcher> double_buffered_dispatcher instead.
+//! need to do that, use \ref<double_buffered_undispatcher> double_buffered_undispatcher instead.
 //!
 //! \tparam Dispatcher Underlying dispatcher type
 template<typename Dispatcher>
-class single_buffered_dispatcher : public buffered_undispatcher<single_buffered_dispatcher<Dispatcher>, Dispatcher> {
-  using base_t = buffered_undispatcher<single_buffered_dispatcher<Dispatcher>, Dispatcher>;
+class single_buffered_undispatcher : public buffered_undispatcher<single_buffered_undispatcher<Dispatcher>, Dispatcher> {
+  using base_t = buffered_undispatcher<single_buffered_undispatcher<Dispatcher>, Dispatcher>;
 
   friend base_t;
   byte_t *ibuf_begin() { return m_buf; }
@@ -301,10 +301,10 @@ public:
   //! \tparam Keyring Keyring which holds the actions to be managed by the dispatcher
   //! \tparam Action_Features Features of the actions managed by the dispatcher
   template<typename Keyring, action_features Action_Features>
-  explicit single_buffered_dispatcher(Keyring, action_features_h<Action_Features>) : single_buffered_dispatcher{} {}
+  explicit single_buffered_undispatcher(Keyring, action_features_h<Action_Features>) : single_buffered_undispatcher{} {}
 
-  //! \copybrief single_buffered_dispatcher::single_buffered_dispatcher
-  single_buffered_dispatcher() = default;
+  //! \copybrief single_buffered_undispatcher::single_buffered_undispatcher
+  single_buffered_undispatcher() = default;
 
 private:
   byte_t m_buf[buffer_size];
@@ -312,20 +312,20 @@ private:
 
 #if __cplusplus >= 201703L
 template<typename Keyring, action_features Action_Features>
-single_buffered_dispatcher(Keyring, action_features_h<Action_Features>)
-    -> single_buffered_dispatcher<dispatcher<Keyring, Action_Features>>;
+single_buffered_undispatcher(Keyring, action_features_h<Action_Features>)
+    -> single_buffered_undispatcher<dispatcher<Keyring, Action_Features>>;
 #endif // __cplusplus >= 201703L
 
 //! \brief Make a single buffered dispatcher
-//! \related single_buffered_dispatcher
+//! \related single_buffered_undispatcher
 #if defined(DOXYGEN)
 template<typename Keyring, action_features Action_Features>
 auto make_single_buffered_dispatcher(Keyring, action_features_h<Action_Features>);
 #else  // defined(DOXYGEN)
 template<typename Keyring, action_features Action_Features>
-single_buffered_dispatcher<dispatcher<Keyring, Action_Features>>
-make_single_buffered_dispatcher(Keyring, action_features_h<Action_Features>) {
-  return single_buffered_dispatcher<dispatcher<Keyring, Action_Features>>{Keyring{},
+single_buffered_undispatcher<dispatcher<Keyring, Action_Features>>
+make_single_buffered_undispatcher(Keyring, action_features_h<Action_Features>) {
+  return single_buffered_undispatcher<dispatcher<Keyring, Action_Features>>{Keyring{},
                                                                           action_features_h<Action_Features>{}};
 }
 #endif // defined(DOXYGEN)
@@ -336,12 +336,12 @@ make_single_buffered_dispatcher(Keyring, action_features_h<Action_Features>) {
 //! request and any action response.
 //!
 //!\note If you would rather having a single buffer and do not mind reading and writing at different moment, consider
-//! using \ref<single_buffered_dispatcher> single_buffered_dispatcher instead.
+//! using \ref<single_buffered_undispatcher> single_buffered_undispatcher instead.
 //!
 //! \tparam Dispatcher Underlying dispatcher type
 template<typename Dispatcher>
-class double_buffered_dispatcher : public buffered_undispatcher<double_buffered_dispatcher<Dispatcher>, Dispatcher> {
-  using base_t = buffered_undispatcher<double_buffered_dispatcher<Dispatcher>, Dispatcher>;
+class double_buffered_undispatcher : public buffered_undispatcher<double_buffered_undispatcher<Dispatcher>, Dispatcher> {
+  using base_t = buffered_undispatcher<double_buffered_undispatcher<Dispatcher>, Dispatcher>;
 
   friend base_t;
   byte_t *ibuf_begin() { return m_ibuf; }
@@ -361,10 +361,10 @@ public:
   //! \tparam Keyring Keyring which holds the actions to be managed by the dispatcher
   //! \tparam Action_Features Features of the actions managed by the dispatcher
   template<typename Keyring, action_features Action_Features>
-  explicit double_buffered_dispatcher(Keyring, action_features_h<Action_Features>) : double_buffered_dispatcher{} {}
+  explicit double_buffered_undispatcher(Keyring, action_features_h<Action_Features>) : double_buffered_undispatcher{} {}
 
-  //! \copybrief double_buffered_dispatcher::double_buffered_dispatcher
-  double_buffered_dispatcher() = default;
+  //! \copybrief double_buffered_undispatcher::double_buffered_undispatcher
+  double_buffered_undispatcher() = default;
 
 private:
   byte_t m_ibuf[input_buffer_size], m_obuf[output_buffer_size];
@@ -372,20 +372,20 @@ private:
 
 #if __cplusplus >= 201703L
 template<typename Keyring, action_features Action_Features>
-double_buffered_dispatcher(Keyring, action_features_h<Action_Features>)
-    -> double_buffered_dispatcher<dispatcher<Keyring, Action_Features>>;
+double_buffered_undispatcher(Keyring, action_features_h<Action_Features>)
+    -> double_buffered_undispatcher<dispatcher<Keyring, Action_Features>>;
 #endif // __cplusplus >= 201703L
 
 //! \brief Make a double buffered dispatcher
-//! \related double_buffered_dispatcher
+//! \related double_buffered_undispatcher
 #if defined(DOXYGEN)
 template<typename Keyring, action_features Action_Features>
 auto make_double_buffered_dispatcher(Keyring, action_features_h<Action_Features>);
 #else  // defined(DOXYGEN)
 template<typename Keyring, action_features Action_Features>
-double_buffered_dispatcher<dispatcher<Keyring, Action_Features>>
-make_double_buffered_dispatcher(Keyring, action_features_h<Action_Features>) {
-  return double_buffered_dispatcher<dispatcher<Keyring, Action_Features>>{Keyring{},
+double_buffered_undispatcher<dispatcher<Keyring, Action_Features>>
+make_double_buffered_undispatcher(Keyring, action_features_h<Action_Features>) {
+  return double_buffered_undispatcher<dispatcher<Keyring, Action_Features>>{Keyring{},
                                                                           action_features_h<Action_Features>{}};
 }
 #endif // defined(DOXYGEN)
