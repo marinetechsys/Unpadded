@@ -16,10 +16,6 @@ if(NOT ${PROJECT_NAME}_INSTALL)
                        GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity)
   FetchContent_Declare(ArduinoFake
                        GIT_REPOSITORY https://github.com/StarQTius/ArduinoFake)
-  FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG v2.11.1)
 endif()
 
 add_subdirectory(include)
@@ -29,7 +25,6 @@ if(NOT ${PROJECT_NAME}_INSTALL)
     include(CTest)
 
     add_subdirectory(doc EXCLUDE_FROM_ALL)
-    add_subdirectory(py/unpadded EXCLUDE_FROM_ALL)
     add_subdirectory(test EXCLUDE_FROM_ALL)
   endif()
 endif()

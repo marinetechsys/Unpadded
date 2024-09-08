@@ -1,6 +1,3 @@
-if(NOT ${PROJECT_NAME}_INSTALL)
-  FetchContent_MakeAvailable(pybind11)
-endif()
 
 if(NOT TARGET iwyu)
   find_program(IWYU_PROGRAM include-what-you-use)
